@@ -7,13 +7,13 @@
 #include <UTFT_Geometry.h>
 #include <stdint.h>
 #include <DS3231.h>
+#include <Wire.h>
 
 
 UTFT myGLCD(ITDB32WC, 38, 39, 40, 41); // In brackets: Screen Model and all the required pins (may differ with each screen)
 URTouch  myTouch(6, 5, 4, 3, 2); // In brackets: Pin connections
 UTFT_Geometry geo(&myGLCD);
-DS3231  rtc(SDA, SCL);
-
+DS3231 rtc(SDA, SCL);
 
 //*******RTC-RELATED VARIABLES*******//
 String currentClock, currentHours, currentMinutes, currentSeconds, currentDate, currentDay, currentMonth, currentYear;
@@ -54,7 +54,7 @@ extern uint8_t UbuntuBold[9124];
 // Constructor
 Graphics::Graphics()
 {
-	
+
 }
 
 
@@ -67,52 +67,123 @@ void Graphics::InitializeScreen() const
 	myTouch.setPrecision(PREC_EXTREME); //PREC_LOW //PREC_MEDIUM //PREC_HI //PREC_EXTREME
 }
 
-void Graphics::InitializeRTC() const
+void Graphics::CheckRTC() 
 {
-   rtc.begin();
+	Wire.begin();
+	byte rtcaddress = 104;
+	Wire.beginTransmission(rtcaddress);
+	byte connection = Wire.endTransmission();
+
+	if (connection == 0)
+	{
+		clockfound = true;
+	}
+	else
+	{
+		clockfound = false;
+	}
+}
+
+void Graphics::InitializeRTC()
+{
+	Graphics::CheckRTC();
+
+	if (!clockfound)
+	{
+		return;
+	}
+
+    rtc.begin();
 	
-   currentTemperature = rtc.getTemp();
-   currentDate = rtc.getDateStr();
-   currentClock = rtc.getTimeStr();
-   timeString = rtc.getTimeStr();
-   currentHours = timeString.substring(0, 2);
-   currentMinutes = timeString.substring(3, 5);
-   currentSeconds = timeString.substring(6, 8);
+    currentTemperature = rtc.getTemp();
+    currentDate = rtc.getDateStr();
+    currentClock = rtc.getTimeStr();
+    timeString = rtc.getTimeStr();
+    currentHours = timeString.substring(0, 2);
+    currentMinutes = timeString.substring(3, 5);
+    currentSeconds = timeString.substring(6, 8);
 }
 
 // Mostly checking if everything's OK, before moving to the main menu
-void Graphics::LoadingScreen()
+void Graphics::LoadingScreen(bool alarmarmed)
 {
+	if (alarmarmed)
+	{
+		delay(300);
+		myGLCD.fillScr(0, 0, 255);
+		myGLCD.setFont(SmallFont);
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.setBackColor(0, 0, 255);
+		myGLCD.print("DETECTED CRASH WHILE SYSTEM WAS ARMED", 0, 5);
+		delay(2000);
+
+		if (clockfound)
+		{
+			myGLCD.print("Checking clock and temperature functions. . .", 0, 56);
+			myGLCD.print("Temperature: ", 0, 70);
+			myGLCD.printNumI(rtc.getTemp(), 112, 70);
+			myGLCD.print("C", 136, 70);
+			delay(500);
+
+			myGLCD.print("Date: ", 0, 84);
+			myGLCD.print(rtc.getDateStr(), 56, 84);
+			delay(500);
+
+			myGLCD.print("Time: ", 0, 98);
+			myGLCD.print(currentHours, 56, 98);
+			myGLCD.print(":", 75, 98);
+			myGLCD.print(currentMinutes, 88, 98);
+			myGLCD.print(":", 107, 98);
+			myGLCD.print(currentSeconds, 120, 98);
+		}
+		else 
+		{
+			myGLCD.print("CLOCK NOT CONNECTED!", 0, 56);
+		}
+		
+
+		myGLCD.print("JUMPING TO ARMED SYSTEM", 1, 120);
+		delay(1500);
+		return;
+	}
+
 	delay(850);
 	myGLCD.setFont(SmallFont);
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(0, 0, 0);
 
 	myGLCD.drawBitmap(278, 3, 36, 32, energy);
-	myGLCD.print("SERENA Alarm Control, version 2.8.1", 0, 0);
+	myGLCD.print("SERENA Alarm Control, version 3.0.0", 0, 0);
 	myGLCD.print("Made by Michael Marinis, Airgeorge", 0, 14);
-
 	delay(1000);
-	myGLCD.print("Making necessary checks. . .", 0, 42);
-	delay(1200);
-	myGLCD.print("Checking clock and temperature functions. . .", 0, 56);
-	myGLCD.print("Temperature: ", 0, 70);
-	myGLCD.printNumI(rtc.getTemp(), 112, 70);
-	myGLCD.print("C", 136, 70);
-	delay(500);
 
-	myGLCD.print("Date: ", 0, 84);
-	myGLCD.print(rtc.getDateStr(), 56, 84);
-	delay(300);
+	if (clockfound)
+	{
+		myGLCD.print("Making necessary checks. . .", 0, 42);
+		delay(1200);
+		myGLCD.print("Checking clock and temperature functions. . .", 0, 56);
+		myGLCD.print("Temperature: ", 0, 70);
+		myGLCD.printNumI(rtc.getTemp(), 112, 70);
+		myGLCD.print("C", 136, 70);
+		delay(500);
 
-	myGLCD.print("Time: ", 0, 98);
-	myGLCD.print(currentHours, 56, 98);
-	myGLCD.print(":", 75, 98);
-	myGLCD.print(currentMinutes, 88, 98);
-	myGLCD.print(":", 107, 98);
-	myGLCD.print(currentSeconds, 120, 98);
-	myGLCD.print("TIME OK! Proceeding to SD Card check...", 0, 112);
-	delay(1500);
+		myGLCD.print("Date: ", 0, 84);
+		myGLCD.print(rtc.getDateStr(), 56, 84);
+		delay(300);
+
+		myGLCD.print("Time: ", 0, 98);
+		myGLCD.print(currentHours, 56, 98);
+		myGLCD.print(":", 75, 98);
+		myGLCD.print(currentMinutes, 88, 98);
+		myGLCD.print(":", 107, 98);
+		myGLCD.print(currentSeconds, 120, 98);
+		myGLCD.print("TIME OK! Proceeding to SD Card check...", 0, 112);
+		delay(1500);
+	}
+	else
+	{
+		myGLCD.print("CLOCK NOT CONNECTED! JUMPING TO SD CHECK", 0, 56);
+	}
 
 	myGLCD.print("Checking SD Card.", 0, 138);
 	delay(500);
@@ -149,12 +220,12 @@ void Graphics::Intro() const
 	myGLCD.print("SERENA", 135, 65);
 	myGLCD.setFont(SmallFont);
 	myGLCD.print("A COMPLETE ALARM CONTROL PANEL", 64, 90);
-	myGLCD.print("VERSION 2.8.1", CENTER, 170);
+	myGLCD.print("VERSION 3.0.0", CENTER, 170);
 
 	delay(1500);
 
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2017, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
 
 	for (int i = 0; i < 30; i++)
 	{
@@ -291,7 +362,7 @@ void Graphics::AlarmTitle() const
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(255, 0, 0);
 	myGLCD.drawLine(0, 14, 319, 14);
-	myGLCD.print("SERENA ALARM CONTROL PANEL v.2.8.1", CENTER, 1);
+	myGLCD.print("SERENA ALARM CONTROL PANEL v.3.0.0", CENTER, 1);
 }
 
 // Prints the Alarm Title with "BY MICHAEL MARINIS"
@@ -483,7 +554,7 @@ void Graphics::MainMenu() const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2017, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
 }
 
 void Graphics::OptionsMenu(int page) const
@@ -501,13 +572,13 @@ void Graphics::OptionsMenu(int page) const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2017, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
 
 	if (page == 1)
 	{
 		myGLCD.setBackColor(192, 192, 192);
 		myGLCD.setColor(0, 0, 255);
-		myGLCD.print("SET MANUAL-ARM PASSWORD", CENTER, 73);
+		myGLCD.print("SET FULL-DISARM PASSWORD", CENTER, 73);
 		myGLCD.print("SET ARM PASSWORD", CENTER, 133);
 	}
 	else if (page == 2)
@@ -544,7 +615,7 @@ void Graphics::OptionsMenuEnd() const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2017, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
 }
 ///**************************************///
 
@@ -706,6 +777,33 @@ void Graphics::WrongPass() const
 
 
 ///******TIME RELATED******///
+
+bool Graphics::GetClockStatus()
+{
+	return clockfound;
+}
+
+void Graphics::ClockNotFound(int menu) const
+{
+	// The input parameter specifies which message will be printed. 1 = in options menus, 2 = in armed menu
+	if (menu == 1)
+	{
+		myGLCD.clrScr();
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.setFont(BigFont);
+		myGLCD.print("CLOCK NOT CONNECTED", CENTER, 120);
+		delay(1000);
+	}
+	else
+	{
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.setFont(BigFont);
+		myGLCD.print("NO CLOCK", CENTER, 115);
+	}
+}
+
 void Graphics::AutoTimeScreen(int autotime, int page)
 {
 	if (page == 1)
@@ -745,7 +843,7 @@ void Graphics::AutoTimeScreen(int autotime, int page)
 
 void Graphics::PrintAutoArmTime(int input, int timelength)
 {
-	if (timelength <= 4)
+	if (timelength <= 4) // Checking so that no more than 4 digits will be printed.
 	{
 		myGLCD.setColor(255, 255, 255);
 		myGLCD.setBackColor(0, 0, 0);
@@ -830,55 +928,59 @@ void Graphics::SystemDisarmed() const
 
 void Graphics::UpdateTime() const
 {	
-	if (currentClock != rtc.getTimeStr()) 
+	Graphics::CheckRTC();
+	if (clockfound)
 	{
-		timeString = rtc.getTimeStr();
-		hoursS = timeString.substring(0, 2);
-		minutesS = timeString.substring(3, 5);
-		secondsS = timeString.substring(6, 8);
-
-		myGLCD.setFont(SevenSegNumFont);
-		myGLCD.setColor(255, 165, 0);
-		myGLCD.setBackColor(0, 0, 0);
-
-
-		myGLCD.print(secondsS, 224, 70);
-
-		if (currentMinutes != minutesS) 
+		if (currentClock != rtc.getTimeStr())
 		{
-			myGLCD.print(minutesS, 128, 70);
-			currentMinutes = minutesS;
-		}
-		if (currentHours != hoursS) 
-		{
-			myGLCD.print(hoursS, 32, 70);
-			currentHours = hoursS;
-		}
+			timeString = rtc.getTimeStr();
+			hoursS = timeString.substring(0, 2);
+			minutesS = timeString.substring(3, 5);
+			secondsS = timeString.substring(6, 8);
 
-		// Checks for change of the date
-		dateS = rtc.getDateStr();
-		delay(10);
-		if (currentDate != dateS) 
-		{
-			myGLCD.setColor(255, 255, 255);
-			myGLCD.setFont(BigFont);
-			myGLCD.print(rtc.getDateStr(), 153, 7);
-		}
+			myGLCD.setFont(SevenSegNumFont);
+			myGLCD.setColor(255, 165, 0);
+			myGLCD.setBackColor(0, 0, 0);
 
-		// Checks for change of the temperature
-		temperature = rtc.getTemp();
-		delay(10);
-		if (currentTemperature != temperature) 
-		{
-			myGLCD.setColor(255, 255, 255);
-			myGLCD.setFont(BigFont);
-			myGLCD.printNumI(temperature, 1, 7);
-			currentTemperature = temperature;
-		}
-		delay(10);
-		currentClock = rtc.getTimeStr();
 
-		Graphics::DrawSeasonGraphics();
+			myGLCD.print(secondsS, 224, 70);
+
+			if (currentMinutes != minutesS)
+			{
+				myGLCD.print(minutesS, 128, 70);
+				currentMinutes = minutesS;
+			}
+			if (currentHours != hoursS)
+			{
+				myGLCD.print(hoursS, 32, 70);
+				currentHours = hoursS;
+			}
+
+			// Checks for change of the date
+			dateS = rtc.getDateStr();
+			delay(10);
+			if (currentDate != dateS)
+			{
+				myGLCD.setColor(255, 255, 255);
+				myGLCD.setFont(BigFont);
+				myGLCD.print(rtc.getDateStr(), 153, 7);
+			}
+
+			// Checks for change of the temperature
+			temperature = rtc.getTemp();
+			delay(10);
+			if (currentTemperature != temperature)
+			{
+				myGLCD.setColor(255, 255, 255);
+				myGLCD.setFont(BigFont);
+				myGLCD.printNumI(temperature, 1, 7);
+				currentTemperature = temperature;
+			}
+			delay(10);
+			currentClock = rtc.getTimeStr();
+
+			Graphics::DrawSeasonGraphics();
+		}
 	}
 }
 
@@ -935,6 +1037,22 @@ void Graphics::AutoCountDown(int autoarmtime) const
 	myGLCD.print("THE ALARM WILL", CENTER, 40);
 	myGLCD.print("BE ARMED IN", CENTER, 60);
 	myGLCD.setFont(SevenSegNumFont);
+	
+	if (autoarmtime == 999) {
+		myGLCD.setColor(0, 0, 0);
+		myGLCD.print("000", CENTER, 110);
+		myGLCD.setColor(255,255,255);
+	}
+	else if (autoarmtime == 99) {
+		myGLCD.setColor(0, 0, 0);
+		myGLCD.print("000", CENTER, 110);
+		myGLCD.setColor(255,255,255);
+	}
+	else if (autoarmtime == 9) {
+		myGLCD.setColor(0, 0, 0);
+		myGLCD.print("000", CENTER, 110);
+		myGLCD.setColor(255,255,255);
+	}
 	myGLCD.printNumI(autoarmtime, CENTER, 110);
 	myGLCD.setFont(BigFont);
 	myGLCD.print("SECONDS", CENTER, 170);
@@ -1455,57 +1573,96 @@ void Graphics::SDNotFound() const
 	delay(3000);
 }
 
-//******MISCELLANEOUS******//
-void Graphics::OtherSettings(bool autoload, bool askarmpass) const
+void Graphics::SDCheckSkipped() const
 {
-	Graphics::AlarmTitle();
-	Graphics::DrawBack();
-	
 	myGLCD.setColor(255, 255, 255);
-	myGLCD.setBackColor(255, 0, 0);
-	myGLCD.print("AUTO PASSWORD LOADING", 5, 30);
-	myGLCD.drawLine(5, 43, 173, 43);
-
-	myGLCD.print("ARM PASSWORD", 45, 110);
-	myGLCD.drawLine(45, 123, 138, 123);
-
 	myGLCD.setBackColor(0, 0, 0);
-	myGLCD.print("*SD REQUIRED!", 190, 60);
+	myGLCD.print("SD Card Check skipped", 1, 150);
+}
 
+//******MISCELLANEOUS******//
+void Graphics::OtherSettings(int page, bool autoload, bool askarmpass, bool sdchecking) const
+{
+	if (page == 1)
+	{
+		Graphics::AlarmTitle();
+		Graphics::DrawBack();
+		Graphics::DrawNext();
+
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.setBackColor(255, 0, 0);
+		myGLCD.print("AUTO PASSWORD LOADING", 5, 30);
+		myGLCD.drawLine(5, 43, 173, 43);
+
+		myGLCD.print("ARM PASSWORD", 45, 110);
+		myGLCD.drawLine(45, 123, 138, 123);
+
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.print("*SD REQUIRED!", 190, 60);
+
+
+
+		myGLCD.setFont(BigFont);
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.print("ON", 5, 47);
+		myGLCD.print("OFF", 125, 47);
+
+		myGLCD.setFont(BigFont);
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.print("ON", 5, 127);
+		myGLCD.print("OFF", 125, 127);
+
+		myGLCD.setFont(Various_Symbols_16x32);
+		if (autoload)
+		{
+			myGLCD.print("B", 15, 65);
+			myGLCD.print("A", 140, 65);
+		}
+		else
+		{
+			myGLCD.print("A", 15, 65);
+			myGLCD.print("B", 140, 65);
+		}
+
+		if (askarmpass)
+		{
+			myGLCD.print("B", 15, 145);
+			myGLCD.print("A", 140, 145);
+		}
+		else
+		{
+			myGLCD.print("A", 15, 145);
+			myGLCD.print("B", 140, 145);
+		}
+	}
+	else if (page == 2)
+	{
+		Graphics::AlarmTitle();
+		Graphics::DrawBack();
+
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.setBackColor(255, 0, 0);
+		myGLCD.print("SD CHECK ON BOOT", 5, 30);
+		myGLCD.drawLine(5, 43, 133, 43);
+
+		myGLCD.setFont(BigFont);
+		myGLCD.setBackColor(0, 0, 0);
+		myGLCD.print("ON", 5, 47);
+		myGLCD.print("OFF", 125, 47);
+
+		myGLCD.setFont(Various_Symbols_16x32);
+		if (sdchecking)
+		{
+			myGLCD.print("B", 15, 65);
+			myGLCD.print("A", 140, 65);
+		}
+		else
+		{
+			myGLCD.print("A", 15, 65);
+			myGLCD.print("B", 140, 65);
+		}
+	}
 	
-
-	myGLCD.setFont(BigFont);
-	myGLCD.setBackColor(0, 0, 0);
-	myGLCD.print("ON", 5, 47);
-	myGLCD.print("OFF", 125, 47);
-
-	myGLCD.setFont(BigFont);
-	myGLCD.setBackColor(0, 0, 0);
-	myGLCD.print("ON", 5, 127);
-	myGLCD.print("OFF", 125, 127);
-
-	myGLCD.setFont(Various_Symbols_16x32);
-	if (autoload)
-	{
-		myGLCD.print("B", 15, 65);
-		myGLCD.print("A", 140, 65);
-	}
-	else
-	{
-		myGLCD.print("A", 15, 65);
-		myGLCD.print("B", 140, 65);
-	}
-
-	if (askarmpass)
-	{
-		myGLCD.print("B", 15, 145);
-		myGLCD.print("A", 140, 145);
-	}
-	else
-	{
-		myGLCD.print("A", 15, 145);
-		myGLCD.print("B", 140, 145);
-	}
 }
 
 void Graphics::AutoLoadTrue(bool autoload) const
@@ -1541,4 +1698,38 @@ void Graphics::AskArmPass(bool askarmpass) const
 		myGLCD.print("B", 140, 145);
 	}
 }
+
+void Graphics::SDChecking(bool sdchecking) const
+{
+	myGLCD.setColor(255, 255, 255);
+	myGLCD.setBackColor(0, 0, 0);
+
+	if (sdchecking)
+	{
+		myGLCD.print("B", 15, 65);
+		myGLCD.print("A", 140, 65);
+	}
+	else
+	{
+		myGLCD.print("A", 15, 65);
+		myGLCD.print("B", 140, 65);
+	}
+}
+
+void Graphics::EEPROMWarning() const
+{
+	myGLCD.clrScr();
+	myGLCD.setColor(255, 255, 0);
+	myGLCD.setBackColor(0, 0, 0);
+	myGLCD.print("EEPROM BYTE WRITE", CENTER, 70);
+	myGLCD.print("NEAR LIMIT", CENTER, 90);
+}
 //*************************//
+
+void Graphics::Debug(long var)
+{
+	myGLCD.setColor(255, 255, 0);
+	myGLCD.setBackColor(0, 0, 0);
+	myGLCD.printNumI(var,CENTER,110);
+	delay(4000);
+}
