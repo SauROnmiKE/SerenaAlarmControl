@@ -1,0 +1,51 @@
+ENGLISH VERSION
+
+SERENA ALARM SYSTEM CHANGELOG
+*****************************
+ CREATED ON 13 November 2016
+*****************************
+
+________
+        | 0.1.0a: First build, basic functions
+        | 0.2.0a: Minor improvements
+        | 0.3.0a: Pass Input and Confirmation for a new Manual-Arm Password is done (12/11/2016)
+        | 0.4.0a: Pass Input and Confirmation for a new Auto-Arm Password is done (12/11/2016)
+        | 1.0.0a: Completed Arm Password Input & Check (12/11/2016, 19:16)
+	| 1.1.0a: Completed the menu when the system is armed (without sending a signal to a relay or something else). The time and date will be added later. The Disarm button is only added (13/11/2016, 13:04)
+        | 1.2.0a: Programmed the "DISARM" button. It prompts to the 5-Digit password input. Password check is also done, which disarms the alarm (without sending a signal to a relay or something else) (13/11/2016, 14:15) 
+  BETA  | 1.2.1a: Fixed an issue where the user couldn't type any numbers after the password confirmation check. If the user pressed "NO", he/she couldn't then type a new password until the "CLEAR" button was presed. This is now fixed 		| (14/11/2016, 13:32)
+VERSIONS| 1.2.2a: The countdown timer for the auto-arming is now complete (14/11/2016, 15:46)
+	| 1.3.0a: Auto-Arm Menu is complete. The Auto-Arm Menu displays the seconds left for the arm to be auto-armed again. The full disarm menu will be accessed via a push button (14/11/2016, 21:42)
+	| 1.3.1a: Changed the "buf" variable from "-1" to "0". This resolved the bug, where the first push of any number button wouldn't do anything (16/11/2016, 00:45)
+	| 1.4.0b: Added the "SET ARM PASSWORD" button which allows the user to modify the 4-digit password used to arm the alarm (16/11/2016, 14:33)
+	| 1.4.1b: The "BACK" buttons from the "SET AUTO-ARM PASS", now redirect to the second page of the options menu, instead of the first one (16/11/2016, 16:21)
+	| 1.4.2b: Completed the third options menu. It contains the buttons "SET TIME" and "SET DATE" (16/11/2016, 16:37)
+	| 1.4.3b: Fixed a bug where the clear button on the disarm pass input wouldn't actually reset the "autoinput" array (17/11/2016, 00:05)
+________| 1.4.4b: The "SET AUTO-ARM PASS" button, will now prompt the user to the second options menu when the password is changed, instead of the first one (18/11/2016, 10:02)
+
+
+
+
+
+________
+	| 1.0.0: Design of the full disarm function. The function will require the 6-Digit password and will prompt to the main menu of the alarm program. A buzzer is heard with every touch of a button (23/12/2016, 17:42)
+	| 1.0.1: Minor aesthetic changes (2/1/2017, 11:15)
+	| 1.1.0: Design of the "Set Time" menu finished. (2/4/2017, 12:30)
+	| 1.2.0: Design of the "Set Date" menu finished, (2/4/2017, 13:20)
+	| 1.3.0: Functions for Set Time & Date are now finished. The user can now set the time and date of the DS3231 directly from the program (3/4/2017, 18:32)
+	| 1.3.1: Time & Date bug fixes: Inaccurate display of time and date is now fixed (5/4/2017, 20:53)
+	| 1.4.0: The program now shows date, time and temperature when the system is armed (12/6/2017, 19:11)
+	| 2.0.0: BlueTooth functions are now added. A BlueTooth which serves as master is connected to the main board, while the slave BlueTooth is connected to an Arduino Nano. The system can now be armed from BlueTooth distance          	| (28/6/2017, 22:39)
+	| 2.0.1: Minor bug fixes (2/7/2017, 9:03)
+RELEASES| 2.1.0: SD Card support: The user has now the choice to store the system's passwords in an SD card (7/7/2017, 00:57)
+	| 2.1.1: SD Card fix. The system couldn't read the SD card more than once, due to a known issue in Arduino's SD library (7/7/2017, 19:37)
+	| 2.2.0: Boot screen. When the board is powered or reset, the boot menu will make some necessary checks for the Real-Time Clock and the SD card (9/7/2017, 14:48)
+	| 2.2.1: SD Card Check. The system asks the user if he/she wants to check again for an SD card, in case one is not inserted (9/7/2017, 23:29)
+	| 2.3.0: Loading Screen. After the boot screen, a loading screen is shown with the SERENA title, the current version and the copyright notice below (10/7/2017, 1:33)
+	| 2.3.1: The copyright notice is now visible in the main menu and all options pages (10/7/2017, 1:35)
+	| 2.4.0: Password Loading. The system will check for existing passwords in the SD card to load, if the user agrees (10/7/2017, 12:00)
+	| 2.4.1: Password Load Fix. The system couldn't load the 6 & 5-digit passwords correctly due to a variable. All passwords now load correctly (12/7/2017, 2:20)
+	| 2.5.1: Fourth Options Page, Boot Options. For now, the boot options will only include the option, where the system will auto-load the passwords from the SD or if the user wants them loaded (14/7/2017, 11:00)
+________| 2.6.1: Auto-Load Passwords Function Complete. The user can now turn on/off this options if he/she wants the program to auto-load the passwords (if any) from the SD card, or give the confirmation to the program to load them 	  	  (14/7/2017, 18:36)
+          2.7.1: Arm-Password Enable/Disable (in the 4th Options Page)
+	  2.8.1b: Start of the Seasonal Upgrade. When the system is armed, depending on the month, the screen will show snowflakes dropping, the sun and waves, or leaves dropping (18/11/2017, 11:47)
