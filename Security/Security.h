@@ -26,6 +26,11 @@ class Security
 public:
 	Security(); // constructor
 
+	//*****ARMING RELATED*****//
+	bool SaveArming(bool alarmarmed);
+	bool CheckArming();
+	//************************//
+
 	int * GetPass(int passtype) const;
 	int * GetTempPass(int passtype);
 	int GetAutoTime(char ttype) const;
@@ -39,6 +44,8 @@ public:
 	bool LoadAutoLoad();
 	void SaveAskArm(bool askarmpass);
 	bool LoadAskArm();
+	void SaveSDChecking(bool sdchecking);
+	bool LoadSDChecking();
 
 	void SetAutoTime();
 	

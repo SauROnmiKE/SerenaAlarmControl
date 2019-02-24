@@ -4,13 +4,66 @@
 #include <Security.h>
 #include <SPI.h>
 #include <SD.h>
+#include <avr/eeprom.h>
 
-File PassFile;
+File OpenedFile;
 
 // Constructor
 Security::Security()
 {
 	
+}
+
+bool Security::SaveArming(bool alarmarmed)
+{
+	eeprom_update_byte(3, alarmarmed);
+
+	String counterStr;
+	char Number;
+	long counter;
+
+	if (SD.begin(53))
+	{
+		if (SD.exists("eeprom.txt"))
+		{
+			OpenedFile = SD.open("eeprom.txt", FILE_READ);
+
+			while (OpenedFile.available())
+			{
+				Number = OpenedFile.read();
+				counterStr += Number;
+			}
+
+			OpenedFile.close();
+			// Removing for easy edit
+			SD.remove("eeprom.txt");
+		}
+		else
+		{
+			// Setting counterStr to "0" if it writes for the first time
+			counterStr = "0";
+		}
+
+		counter = counterStr.toInt();
+		counter++;
+
+		OpenedFile = SD.open("eeprom.txt", FILE_WRITE);
+		OpenedFile.print(counter);
+		OpenedFile.close();
+	}
+
+	// returns a true value if the byte in EEPROM has been written over 90000 times. ATMEL's specs for ATmeaga2560 is at least 100000 write/erase cycles
+	if (counter > 90000)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool Security::CheckArming()
+{
+	return eeprom_read_byte(3);
 }
 
 int * Security::GetPass(int passtype) const
@@ -103,15 +156,15 @@ bool Security::LoadSDPass(int passtype)
 
 		if (SD.exists("manual.txt"))
 		{
-			PassFile = SD.open("manual.txt", FILE_READ);
+			OpenedFile = SD.open("manual.txt", FILE_READ);
 			
-			while (PassFile.available())
+			while (OpenedFile.available())
 			{
-				Number = PassFile.read();
+				Number = OpenedFile.read();
 				Password += Number;
 			}
 
-			PassFile.close();
+			OpenedFile.close();
 			temppass = Password.toInt();
 
 			for (int i = 0; i < 6; i++)
@@ -160,15 +213,15 @@ bool Security::LoadSDPass(int passtype)
 
 		if (SD.exists("auto.txt"))
 		{
-			PassFile = SD.open("auto.txt", FILE_READ);
+			OpenedFile = SD.open("auto.txt", FILE_READ);
 
-			while (PassFile.available())
+			while (OpenedFile.available())
 			{
-				Number = PassFile.read();
+				Number = OpenedFile.read();
 				Password += Number;
 			}
 
-			PassFile.close();
+			OpenedFile.close();
 			temppass = Password.toInt();
 
 			for (int i = 0; i < 5; i++)
@@ -213,15 +266,15 @@ bool Security::LoadSDPass(int passtype)
 
 		if (SD.exists("arm.txt"))
 		{
-			PassFile = SD.open("arm.txt", FILE_READ);
+			OpenedFile = SD.open("arm.txt", FILE_READ);
 
-			while (PassFile.available())
+			while (OpenedFile.available())
 			{
-				Number = PassFile.read();
+				Number = OpenedFile.read();
 				Password += Number;
 			}
 
-			PassFile.close();
+			OpenedFile.close();
 			temppass = Password.toInt();
 
 			for (int i = 0; i < 4; i++)
@@ -265,14 +318,14 @@ void Security::SetSDPass(int passtype)
 			SD.remove("arm.txt");
 		}
 
-		PassFile = SD.open("arm.txt", FILE_WRITE);
+		OpenedFile = SD.open("arm.txt", FILE_WRITE);
 
 		for (i = 0; i < 4; i++)
 		{
-			PassFile.print(armpass[i]);
+			OpenedFile.print(armpass[i]);
 		}
 
-		PassFile.close();
+		OpenedFile.close();
 	}
 	else if (passtype == 5)
 	{
@@ -281,14 +334,14 @@ void Security::SetSDPass(int passtype)
 			SD.remove("auto.txt");
 		}
 
-		PassFile = SD.open("auto.txt", FILE_WRITE);
+		OpenedFile = SD.open("auto.txt", FILE_WRITE);
 
 		for (i = 0; i < 5; i++)
 		{
-			PassFile.print(autopass[i]);
+			OpenedFile.print(autopass[i]);
 		}
 
-		PassFile.close();
+		OpenedFile.close();
 	}
 	else if (passtype == 6)
 	{
@@ -297,85 +350,45 @@ void Security::SetSDPass(int passtype)
 			SD.remove("manual.txt");
 		}
 
-		PassFile = SD.open("manual.txt", FILE_WRITE);
+		OpenedFile = SD.open("manual.txt", FILE_WRITE);
 
 		for (i = 0; i < 6; i++)
 		{
-			PassFile.print(mpass[i]);
+			OpenedFile.print(mpass[i]);
 		}
 
-		PassFile.close();
+		OpenedFile.close();
 	}
 }
 
 void Security::SaveAutoLoad(bool autoload)
 {
-	if (SD.exists("autoload.txt"))
-	{
-		SD.remove("autoload.txt");
-	}
-
-	PassFile = SD.open("autoload.txt", FILE_WRITE);
-
-	PassFile.print(autoload);
-	PassFile.close();
+	eeprom_update_byte(0, autoload);
 }
 
 bool Security::LoadAutoLoad()
 {
-	char TextReader;
-	if (!SD.exists("autoload.txt")) // This should be the case ONLY when the alarm is new and the SD is empty
-	{
-		return true;
-	}
-	PassFile = SD.open("autoload.txt", FILE_READ);
-	while (PassFile.available())
-	{
-		TextReader = PassFile.read();
-	}
-
-	PassFile.close();
-
-	if (TextReader == '1')
-	{
-		return true;
-	}
-	return false;
+	return eeprom_read_byte(0);
 }
 
 void Security::SaveAskArm(bool askarmpass)
 {
-	if (SD.exists("askarm.txt"))
-	{
-		SD.remove("askarm.txt");
-	}
-
-	PassFile = SD.open("askarm.txt", FILE_WRITE);
-
-	PassFile.print(askarmpass);
-	PassFile.close();
+	eeprom_update_byte(1, askarmpass);
 }
 
 bool Security::LoadAskArm()
 {
-	char TextReader;
-	if (!SD.exists("askarm.txt")) // This should be the case ONLY when the alarm is new and the SD is empty
-	{
-		return true;
-	}
-	PassFile = SD.open("askarm.txt", FILE_READ);
-	while (PassFile.available())
-	{
-		TextReader = PassFile.read();
-	}
+	return eeprom_read_byte(1);
+}
 
-	PassFile.close();
+void Security::SaveSDChecking(bool sdchecking)
+{
+	eeprom_update_byte(2, sdchecking);
+}
 
-	if (TextReader == '1')
-	{
-		return true;
-	}
-	return false;
+bool Security::LoadSDChecking()
+{
+	return eeprom_read_byte(2);
 }
 
 // Resets user inputs whenever a new or a current password is about to be entered
@@ -513,9 +526,7 @@ int Security::AutoArmUpdate(int number, int buf)
 }
 
 
-
-
-// Gets the auto-arm time and passes it to the main program, so that a Graphics object can use it.
+// Gets the auto-arm time and passes it to the main program, so that a Graphics object can use it. "o" = OLD, "n" = NEW
 int Security::GetAutoTime(char ttype) const
 {
 	if (ttype == 'o')
@@ -544,17 +555,7 @@ int Security::AutoTimeUpdate(int input, int timelength)
 			timeinput = input;
 			return timeinput;
 		}
-		else if (timelength == 1)
-		{
-			timeinput = (timeinput * 10) + input;
-			return timeinput;
-		}
-		else if (timelength == 2)
-		{
-			timeinput = (timeinput * 10) + input;
-			return timeinput;
-		}
-		else if (timelength == 3)
+		else
 		{
 			timeinput = (timeinput * 10) + input;
 			return timeinput;
