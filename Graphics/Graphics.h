@@ -28,12 +28,13 @@ public:
 	Graphics(); // Constructor
 
 	void InitializeScreen() const;
-	void InitializeRTC() const;
+	void InitializeRTC();
+	void CheckRTC();
 
 	void SDFound(bool sdfound) const;
 	void LoadingPass(bool load, int passtype) const;
 	void PassLoadSuccess(bool success, int passtype) const;
-	void LoadingScreen();
+	void LoadingScreen(bool alarmarmed);
 	void BootProgram();
 
 	void Intro() const;
@@ -67,6 +68,7 @@ public:
 
 
 	bool Available() const;
+	bool clockfound;
 
 	//********PASSWORD RELATED********//
 	void PassInputMessage(int passtype, char newoldpass) const;
@@ -77,15 +79,15 @@ public:
 	void PassChangeSuccessful() const;
 	void WrongPass() const;
 	
-	
 	//******TIME RELATED******//
+	bool GetClockStatus();
+	void ClockNotFound(int menu) const;
 	void AutoTimeScreen(int autotime, int page);
 	void PrintAutoArmTime(int input, int timelength);
 	void AutoTimeChangeSuccess();
 	void DrawTimeDate() const;
 	void DrawColon() const;
 	void DrawTime() const;
-	 
 
 	//*******ARM/DISARM RELATED*******//
 	void SystemArmed() const;
@@ -120,13 +122,18 @@ public:
 	//******SD CARD RELATED******//
 	void SelectStorage() const;
 	void SDNotFound() const;
+	void SDCheckSkipped() const;
 	//***************************//
 
 	//******MISCELLANEOUS******//
-	void OtherSettings(bool autoload, bool askarmpass) const;
+	void OtherSettings(int page, bool autoload, bool askarmpass, bool sdchecking) const;
 	void AutoLoadTrue(bool autoload) const;
 	void AskArmPass(bool askarmpass) const;
+	void SDChecking(bool sdchecking) const;
+	void EEPROMWarning() const;
 	//*************************//
+	
+	void Debug(long var);
 };
 #endif
 
