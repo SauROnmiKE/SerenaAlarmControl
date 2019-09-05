@@ -3,7 +3,7 @@
   //
   //Author: Michael Marinis
   //
-  //(c)2018 Michael Marinis. All Rights Reserved
+  //(c)2019 Michael Marinis. All Rights Reserved
   //
   //Website: http://www.youtube.com/SauROnmiKE
 */
@@ -49,6 +49,7 @@ long timerEnd = 0;
 //*****ALARM RELATED*****//
 bool alarmarmed = false;
 bool askarmpass;
+void LoadPasses(bool alarmarmed);
 //***********************//
 
 
@@ -73,7 +74,18 @@ void setup()
   if (alarmarmed)
   {
     ArmedSysErrorBeep();
+    autoload = SerenaSecurity.LoadAutoLoad();
     SerenaGraphics.LoadingScreen(alarmarmed);
+    askarmpass = SerenaSecurity.LoadAskArm();
+    if (SerenaSecurity.CheckSD())
+    {
+      LoadPasses(alarmarmed);
+    }
+    else
+    {
+      SerenaGraphics.SDFound(false);
+    }
+    SerenaGraphics.ContinuingToProgram(true);
   }
   else
   {
@@ -101,37 +113,7 @@ SDCheck:
 
               if ((x >= 5) && (x <= 50) && (y >= 185) && (y <= 215)) // "Y" Button
               {
-                SerenaGraphics.ClearScreen();
-                SerenaGraphics.LoadingPass(true, 6);
-                if (SerenaSecurity.LoadSDPass(6))
-                {
-                  SerenaGraphics.PassLoadSuccess(true, 6);
-                }
-                else
-                {
-                  SerenaGraphics.PassLoadSuccess(false, 6);
-                }
-                SerenaGraphics.LoadingPass(true, 5);
-                if (SerenaSecurity.LoadSDPass(5))
-                {
-                  SerenaGraphics.PassLoadSuccess(true, 5);
-                }
-                else
-                {
-                  SerenaGraphics.PassLoadSuccess(false, 5);
-                }
-
-                SerenaGraphics.LoadingPass(true, 4);
-                if (SerenaSecurity.LoadSDPass(4))
-                {
-                  SerenaGraphics.PassLoadSuccess(true, 4);
-                  goto Intro;
-                }
-                else
-                {
-                  SerenaGraphics.PassLoadSuccess(false, 4);
-                  goto Intro;
-                }
+                LoadPasses(alarmarmed);
               }
 
               if ((x >= 60) && (x <= 105) && (y >= 185) && (y <= 215)) // "N" Button
@@ -144,39 +126,8 @@ SDCheck:
         }
         else
         {
-          SerenaGraphics.ClearScreen();
-          SerenaGraphics.LoadingPass(true, 6);
-          if (SerenaSecurity.LoadSDPass(6))
-          {
-            SerenaGraphics.PassLoadSuccess(true, 6);
-          }
-          else
-          {
-            SerenaGraphics.PassLoadSuccess(false, 6);
-          }
-          SerenaGraphics.LoadingPass(true, 5);
-          if (SerenaSecurity.LoadSDPass(5))
-          {
-            SerenaGraphics.PassLoadSuccess(true, 5);
-          }
-          else
-          {
-            SerenaGraphics.PassLoadSuccess(false, 5);
-          }
-
-          SerenaGraphics.LoadingPass(true, 4);
-          if (SerenaSecurity.LoadSDPass(4))
-          {
-            SerenaGraphics.PassLoadSuccess(true, 4);
-            goto Intro;
-          }
-          else
-          {
-            SerenaGraphics.PassLoadSuccess(false, 4);
-            goto Intro;
-          }
+          LoadPasses(alarmarmed);
         }
-
       }
       else
       {
@@ -2471,15 +2422,9 @@ DisarmInput:
                     {
                       SerenaSecurity.ResetInputs();
                       alarmarmed = false;
-                      eepromwarning = SerenaSecurity.SaveArming(alarmarmed);
                       BT.write(alarmarmed);
                       SerenaGraphics.SystemDisarmed();
                       LongBeep();
-                      if (eepromwarning)
-                      {
-                        SerenaGraphics.EEPROMWarning();
-                        LongBeep();
-                      }
                       delay(1000);
 
                       long autoarmtime = SerenaSecurity.GetAutoTime('o'); // In milliseconds
@@ -2742,6 +2687,12 @@ FullDisarmInput:
 
                                   if (correctpass)
                                   {
+                                    eepromwarning = SerenaSecurity.SaveArming(alarmarmed);
+                                    if (eepromwarning)
+                                    {
+                                      SerenaGraphics.EEPROMWarning();
+                                      LongBeep();
+                                    }
                                     SerenaSecurity.ResetInputs();
                                     autoarmtime = SerenaSecurity.GetAutoTime('o');
                                     autoarmtime *= 1000;
@@ -2824,4 +2775,42 @@ void ArmedSysErrorBeep()
   digitalWrite(buzzerpin, HIGH);
   delay(200);
   digitalWrite(buzzerpin, LOW);
+}
+
+void LoadPasses(bool alarmarmed)
+{
+  SerenaGraphics.ClearScreen();
+  if (alarmarmed)
+  {
+    SerenaGraphics.ChangeColour('b');
+  }
+
+  SerenaGraphics.LoadingPass(true, 6);
+  if (SerenaSecurity.LoadSDPass(6))
+  {
+    SerenaGraphics.PassLoadSuccess(true, 6, alarmarmed);
+  }
+  else
+  {
+    SerenaGraphics.PassLoadSuccess(false, 6, alarmarmed);
+  }
+  SerenaGraphics.LoadingPass(true, 5);
+  if (SerenaSecurity.LoadSDPass(5))
+  {
+    SerenaGraphics.PassLoadSuccess(true, 5, alarmarmed);
+  }
+  else
+  {
+    SerenaGraphics.PassLoadSuccess(false, 5, alarmarmed);
+  }
+
+  SerenaGraphics.LoadingPass(true, 4);
+  if (SerenaSecurity.LoadSDPass(4))
+  {
+    SerenaGraphics.PassLoadSuccess(true, 4, alarmarmed);
+  }
+  else
+  {
+    SerenaGraphics.PassLoadSuccess(false, 4, alarmarmed);
+  }
 }
