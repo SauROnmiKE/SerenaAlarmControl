@@ -3,7 +3,7 @@
 //
 //Author: Michael Marinis
 //
-//©2017 Michael Marinis
+//©2019 Michael Marinis
 //
 //Website: http://www.youtube.com/SauROnmiKE
 //
@@ -33,9 +33,11 @@ public:
 
 	void SDFound(bool sdfound) const;
 	void LoadingPass(bool load, int passtype) const;
-	void PassLoadSuccess(bool success, int passtype) const;
+	void ChangeColour(char colour);
+	void PassLoadSuccess(bool success, int passtype, bool crash) const;
 	void LoadingScreen(bool alarmarmed);
 	void BootProgram();
+	void ContinuingToProgram(bool crash);
 
 	void Intro() const;
 	void DrawArc() const;

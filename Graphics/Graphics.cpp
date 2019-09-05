@@ -104,7 +104,7 @@ void Graphics::InitializeRTC()
     currentSeconds = timeString.substring(6, 8);
 }
 
-// Mostly checking if everything's OK, before moving to the main menu
+// Mostly checking if everything is OK, before moving to the main menu
 void Graphics::LoadingScreen(bool alarmarmed)
 {
 	if (alarmarmed)
@@ -141,9 +141,11 @@ void Graphics::LoadingScreen(bool alarmarmed)
 			myGLCD.print("CLOCK NOT CONNECTED!", 0, 56);
 		}
 		
-
-		myGLCD.print("JUMPING TO ARMED SYSTEM", 1, 120);
-		delay(1500);
+		myGLCD.print("Checking SD Card.", 0, 138);
+	    delay(150);
+	    myGLCD.print(".", 136, 138);
+		delay(150);
+		myGLCD.print(".", 144, 138);
 		return;
 	}
 
@@ -153,7 +155,7 @@ void Graphics::LoadingScreen(bool alarmarmed)
 	myGLCD.setBackColor(0, 0, 0);
 
 	myGLCD.drawBitmap(278, 3, 36, 32, energy);
-	myGLCD.print("SERENA Alarm Control, version 3.0.0", 0, 0);
+	myGLCD.print("SERENA Alarm Control, version 3.0.2", 0, 0);
 	myGLCD.print("Made by Michael Marinis, Airgeorge", 0, 14);
 	delay(1000);
 
@@ -200,6 +202,23 @@ void Graphics::BootProgram()
 	delay(3500);
 }
 
+void Graphics::ContinuingToProgram(bool crash)
+{
+	if (crash)
+	{
+		myGLCD.setColor(255, 255, 255);
+		myGLCD.print("JUMPING TO ARMED SYSTEM", 1, 120);
+	    delay(1500);
+	}
+	else
+	{
+		myGLCD.setColor(255, 255, 0);
+		myGLCD.print("Preparing to boot program!", 0, 124);
+		delay(3500);
+	}
+	
+}
+
 void Graphics::DrawArc() const
 {
 	myGLCD.clrScr();
@@ -220,12 +239,12 @@ void Graphics::Intro() const
 	myGLCD.print("SERENA", 135, 65);
 	myGLCD.setFont(SmallFont);
 	myGLCD.print("A COMPLETE ALARM CONTROL PANEL", 64, 90);
-	myGLCD.print("VERSION 3.0.0", CENTER, 170);
+	myGLCD.print("VERSION 3.0.2", CENTER, 170);
 
 	delay(1500);
 
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2019, Michael & George Marinis", CENTER, 227);
 
 	for (int i = 0; i < 30; i++)
 	{
@@ -262,7 +281,7 @@ void Graphics::SDFound(bool sdfound) const
 
 // Prints message on password load
 void Graphics::LoadingPass(bool load, int passtype) const
-{
+{	
 	if (load)
 	{
 		if (passtype == 6)
@@ -290,8 +309,15 @@ void Graphics::LoadingPass(bool load, int passtype) const
 	
 }
 
+void Graphics::ChangeColour(char colour)
+{
+	if (colour == 'r') {myGLCD.fillScr(255,0,0);}
+	if (colour == 'g') {myGLCD.fillScr(0,255,0);}
+	if (colour == 'b') {myGLCD.fillScr(0,0,255);}
+}
+
 // Prints message on if the pass loading was successful or not
-void Graphics::PassLoadSuccess(bool success, int passtype) const
+void Graphics::PassLoadSuccess(bool success, int passtype, bool crash) const
 {
 	delay(2500);
 
@@ -300,12 +326,12 @@ void Graphics::PassLoadSuccess(bool success, int passtype) const
 		if (success)
 		{
 			myGLCD.print("Password was loaded successfully!", 0, 14);
-			delay(1000);
+			delay(450);
 		}
 		else
 		{
 			myGLCD.print("Loading failed. File not found.", 0, 14);
-			delay(850);
+			delay(250);
 		}
 	}
 
@@ -314,12 +340,12 @@ void Graphics::PassLoadSuccess(bool success, int passtype) const
 		if (success)
 		{
 			myGLCD.print("Password was loaded successfully!", 0, 56);
-			delay(1000);
+			delay(450);
 		}
 		else
 		{
 			myGLCD.print("Loading failed. File not found.", 0, 56);
-			delay(850);
+			delay(250);
 		}
 	}
 
@@ -328,20 +354,16 @@ void Graphics::PassLoadSuccess(bool success, int passtype) const
 		if (success)
 		{
 			myGLCD.print("Password was loaded successfully!", 0, 98);
-			delay(1000);
+			delay(450);
 
-			myGLCD.setColor(255, 255, 0);
-			myGLCD.print("Preparing to boot program!", 0, 124);
-			delay(3500);
+			Graphics::ContinuingToProgram(crash);
 		}
 		else
 		{
 			myGLCD.print("Loading failed. File not found.", 0, 98);
-			delay(850);
+			delay(250);
 
-			myGLCD.setColor(255, 255, 0);
-			myGLCD.print("Preparing to boot program!", 0, 124);
-			delay(3500);
+			Graphics::ContinuingToProgram(crash);
 		}
 	}
 	
@@ -362,7 +384,7 @@ void Graphics::AlarmTitle() const
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(255, 0, 0);
 	myGLCD.drawLine(0, 14, 319, 14);
-	myGLCD.print("SERENA ALARM CONTROL PANEL v.3.0.0", CENTER, 1);
+	myGLCD.print("SERENA ALARM CONTROL PANEL v.3.0.2", CENTER, 1);
 }
 
 // Prints the Alarm Title with "BY MICHAEL MARINIS"
@@ -554,7 +576,7 @@ void Graphics::MainMenu() const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2019, Michael & George Marinis", CENTER, 227);
 }
 
 void Graphics::OptionsMenu(int page) const
@@ -572,7 +594,7 @@ void Graphics::OptionsMenu(int page) const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2019, Michael & George Marinis", CENTER, 227);
 
 	if (page == 1)
 	{
@@ -615,7 +637,7 @@ void Graphics::OptionsMenuEnd() const
 	myGLCD.setColor(255, 165, 0);
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
-	myGLCD.print("(c) 2018, Michael & George Marinis", CENTER, 227);
+	myGLCD.print("(c) 2019, Michael & George Marinis", CENTER, 227);
 }
 ///**************************************///
 
