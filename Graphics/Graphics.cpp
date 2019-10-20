@@ -155,7 +155,7 @@ void Graphics::LoadingScreen(bool alarmarmed)
 	myGLCD.setBackColor(0, 0, 0);
 
 	myGLCD.drawBitmap(278, 3, 36, 32, energy);
-	myGLCD.print("SERENA Alarm Control, version 3.0.2", 0, 0);
+	myGLCD.print("SERENA Alarm Control, version 3.0.3", 0, 0);
 	myGLCD.print("Made by Michael Marinis, Airgeorge", 0, 14);
 	delay(1000);
 
@@ -239,7 +239,7 @@ void Graphics::Intro() const
 	myGLCD.print("SERENA", 135, 65);
 	myGLCD.setFont(SmallFont);
 	myGLCD.print("A COMPLETE ALARM CONTROL PANEL", 64, 90);
-	myGLCD.print("VERSION 3.0.2", CENTER, 170);
+	myGLCD.print("VERSION 3.0.3", CENTER, 170);
 
 	delay(1500);
 
@@ -384,7 +384,7 @@ void Graphics::AlarmTitle() const
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(255, 0, 0);
 	myGLCD.drawLine(0, 14, 319, 14);
-	myGLCD.print("SERENA ALARM CONTROL PANEL v.3.0.2", CENTER, 1);
+	myGLCD.print("SERENA ALARM CONTROL PANEL v.3.0.3", CENTER, 1);
 }
 
 // Prints the Alarm Title with "BY MICHAEL MARINIS"
@@ -516,48 +516,48 @@ void Graphics::DrawKeyboard() const
 	for (z = 0; z < 3; z++)
 	{
 		myGLCD.setColor(255, 0, 0);
-		myGLCD.fillRoundRect(20 + (z * 60), 15, 60 + (z * 60), 55);
+		myGLCD.fillRoundRect(130 + (z * 60), 75, 170 + (z * 60), 115);
 		myGLCD.setColor(255, 255, 255);
 		myGLCD.setBackColor(255, 0, 0);
-		myGLCD.printNumI(z + 1, 37 + (z * 60), 30);
+		myGLCD.printNumI(z + 1, 147 + (z * 60), 90);
 	}
 
 	for (z = 0; z < 3; z++)
 	{
 		myGLCD.setColor(255, 0, 0);
-		myGLCD.fillRoundRect(20 + (z * 60), 70, 60 + (z * 60), 110);
+		myGLCD.fillRoundRect(130 + (z * 60), 130, 170 + (z * 60), 170);
 		myGLCD.setColor(255, 255, 255);
 		myGLCD.setBackColor(255, 0, 0);
-		myGLCD.printNumI(z + 4, 37 + (z * 60), 85);
+		myGLCD.printNumI(z + 4, 147 + (z * 60), 145);
 	}
 
 	for (z = 0; z < 3; z++)
 	{
 		myGLCD.setColor(255, 0, 0);
-		myGLCD.fillRoundRect(20 + (z * 60), 125, 60 + (z * 60), 165);
+		myGLCD.fillRoundRect(130 + (z * 60), 185, 170 + (z * 60), 225);
 		myGLCD.setColor(255, 255, 255);
 		myGLCD.setBackColor(255, 0, 0);
-		myGLCD.printNumI(z + 7, 37 + (z * 60), 140);
+		myGLCD.printNumI(z + 7, 147 + (z * 60), 200);
 	}
 
 	for (z = 0; z < 3; z++)
 	{
 		myGLCD.setColor(255, 0, 0);
-		myGLCD.fillRoundRect(190, 15 + (z * 55), 290, 55 + (z * 55));
+		myGLCD.fillRoundRect(20, 75 + (z * 55), 120, 115 + (z * 55));
 	}
 
 
 	myGLCD.setColor(255, 0, 0);
-	myGLCD.fillRoundRect(20, 175, 80, 205);
+	myGLCD.fillRoundRect(235, 20, 290, 60);
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(255, 0, 0);
-	myGLCD.printNumI(0, 48, 185);
+	myGLCD.printNumI(0, 260, 35);
 
 	myGLCD.setColor(255, 255, 255);
 	myGLCD.setBackColor(255, 0, 0);
-	myGLCD.print("CLEAR", 221, 30);
-	myGLCD.print("OK", 232, 85);
-	myGLCD.print("BACK", 225, 140);
+	myGLCD.print("CLEAR", 51, 90);
+	myGLCD.print("OK", 62, 145);
+	myGLCD.print("BACK", 55, 200);
 
 	myGLCD.setFont(SevenSegNumFont);
 	myGLCD.setBackColor(0, 0, 0);
@@ -577,6 +577,13 @@ void Graphics::MainMenu() const
 	myGLCD.setBackColor(0, 0, 0);
 	myGLCD.fillRect(0, 226, 319, 239);
 	myGLCD.print("(c) 2019, Michael & George Marinis", CENTER, 227);
+	
+	myGLCD.setBackColor(255,165,0);
+	myGLCD.fillRoundRect(270, 25, 300, 55);
+	myGLCD.setColor(0,0,0);
+	myGLCD.setFont(BigFont);
+	myGLCD.print("?", 277, 33);
+	myGLCD.setFont(SmallFont);
 }
 
 void Graphics::OptionsMenu(int page) const
@@ -746,7 +753,7 @@ void Graphics::PrintNumber(int input, int buf, int passtype) const
 		{
 			myGLCD.setColor(255, 255, 255);
 			myGLCD.setBackColor(0, 0, 0);
-			myGLCD.printNumI(input, 100 + (buf * 35), 185);
+			myGLCD.printNumI(input, 15 + (buf * 35), 15);
 		}
 	}
 	else if (passtype == 5)
@@ -755,7 +762,7 @@ void Graphics::PrintNumber(int input, int buf, int passtype) const
 		{
 			myGLCD.setColor(255, 255, 255);
 			myGLCD.setBackColor(0, 0, 0);
-			myGLCD.printNumI(input, 100 + (buf * 35), 185);
+			myGLCD.printNumI(input, 15 + (buf * 35), 15);
 		}
 	}
 	else if (passtype == 4)
@@ -764,7 +771,7 @@ void Graphics::PrintNumber(int input, int buf, int passtype) const
 		{
 			myGLCD.setColor(255, 255, 255);
 			myGLCD.setBackColor(0, 0, 0);
-			myGLCD.printNumI(input, 100 + (buf * 35), 185);
+			myGLCD.printNumI(input, 15 + (buf * 35), 15);
 		}
 	}
 }
@@ -865,11 +872,11 @@ void Graphics::AutoTimeScreen(int autotime, int page)
 
 void Graphics::PrintAutoArmTime(int input, int timelength)
 {
-	if (timelength <= 4) // Checking so that no more than 4 digits will be printed.
+	if (timelength < 4) // Checking so that no more than 4 digits will be printed.
 	{
 		myGLCD.setColor(255, 255, 255);
 		myGLCD.setBackColor(0, 0, 0);
-		myGLCD.printNumI(input, 140, 185);
+		myGLCD.printNumI(input, 15, 15);
 	}
 }
 
